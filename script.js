@@ -87,128 +87,39 @@ function playBackgroundMusic() {
 // Initialize the first image
 showImage(currentIndex);
 
-// Full-screen functionality
+// Make navigation buttons more transparent
+document.addEventListener('DOMContentLoaded', () => {
+    const prevButton = document.querySelector('.arrow.left');
+    const nextButton = document.querySelector('.arrow.right');
+    
+    if (prevButton && nextButton) {
+        prevButton.style.opacity = '0.6';
+        nextButton.style.opacity = '0.6';
+        
+        // Add hover effect to make them more visible when hovered
+        prevButton.addEventListener('mouseenter', () => {
+            prevButton.style.opacity = '1';
+        });
+        
+        prevButton.addEventListener('mouseleave', () => {
+            prevButton.style.opacity = '0.6';
+        });
+        
+        nextButton.addEventListener('mouseenter', () => {
+            nextButton.style.opacity = '1';
+        });
+        
+        nextButton.addEventListener('mouseleave', () => {
+            nextButton.style.opacity = '0.6';
+        });
+    }
+});
+
+// Initialize audio on page load
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize the audio element
     const backgroundMusic = document.getElementById('background-music');
     backgroundMusic.volume = 0.5; // Set volume to 50%
-    
-    // Function to request fullscreen
-    function requestFullscreen() {
-        const elem = document.documentElement;
-        
-        if (elem.requestFullscreen) {
-            elem.requestFullscreen();
-        } else if (elem.webkitRequestFullscreen) { /* Safari */
-            elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen) { /* IE11 */
-            elem.msRequestFullscreen();
-        }
-    }
-    
-    // Function to check if the device is mobile
-    function isMobileDevice() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    }
-    
-    // Request fullscreen on mobile devices
-    if (isMobileDevice()) {
-        // Try to enter fullscreen mode
-        requestFullscreen();
-        
-        // Add event listener for orientation change to re-enter fullscreen
-        window.addEventListener('orientationchange', () => {
-            setTimeout(requestFullscreen, 100);
-        });
-        
-        // Prevent default touch behaviors that might exit fullscreen
-        document.addEventListener('touchmove', (e) => {
-            if (e.touches.length > 1) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-        
-        // Prevent pull-to-refresh
-        document.body.style.overscrollBehavior = 'none';
-        
-        // Hide scrollbars
-        document.body.style.overflow = 'hidden';
-        
-        // Add a button to re-enter fullscreen if it gets exited
-        const fullscreenButton = document.createElement('button');
-        fullscreenButton.textContent = 'Full Screen';
-        fullscreenButton.style.position = 'fixed';
-        fullscreenButton.style.bottom = '20px';
-        fullscreenButton.style.left = '20px';
-        fullscreenButton.style.zIndex = '1000';
-        fullscreenButton.style.padding = '10px 20px';
-        fullscreenButton.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-        fullscreenButton.style.color = 'white';
-        fullscreenButton.style.border = 'none';
-        fullscreenButton.style.borderRadius = '5px';
-        fullscreenButton.style.cursor = 'pointer';
-        fullscreenButton.style.display = 'none'; // Hidden by default
-        
-        fullscreenButton.addEventListener('click', () => {
-            requestFullscreen();
-        });
-        
-        document.body.appendChild(fullscreenButton);
-        
-        // Show the button when fullscreen is exited
-        document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) {
-                fullscreenButton.style.display = 'block';
-            } else {
-                fullscreenButton.style.display = 'none';
-            }
-        });
-        
-        document.addEventListener('webkitfullscreenchange', () => {
-            if (!document.webkitFullscreenElement) {
-                fullscreenButton.style.display = 'block';
-            } else {
-                fullscreenButton.style.display = 'none';
-            }
-        });
-        
-        document.addEventListener('mozfullscreenchange', () => {
-            if (!document.mozFullScreenElement) {
-                fullscreenButton.style.display = 'block';
-            } else {
-                fullscreenButton.style.display = 'none';
-            }
-        });
-        
-        document.addEventListener('MSFullscreenChange', () => {
-            if (!document.msFullscreenElement) {
-                fullscreenButton.style.display = 'block';
-            } else {
-                fullscreenButton.style.display = 'none';
-            }
-        });
-        
-        // Add instructions for adding to home screen
-        const homeScreenInstructions = document.createElement('div');
-        homeScreenInstructions.innerHTML = `
-            <div style="position: fixed; bottom: 20px; right: 20px; background-color: rgba(0,0,0,0.7); color: white; padding: 10px; border-radius: 5px; z-index: 1000; max-width: 80%; font-size: 14px;">
-                <p>For the best experience, add this page to your home screen:</p>
-                <p>1. Open your browser menu</p>
-                <p>2. Select "Add to Home Screen"</p>
-                <p>3. Launch from your home screen</p>
-            </div>
-        `;
-        document.body.appendChild(homeScreenInstructions);
-        
-        // Hide instructions after 10 seconds
-        setTimeout(() => {
-            homeScreenInstructions.style.opacity = '0';
-            homeScreenInstructions.style.transition = 'opacity 1s ease';
-            setTimeout(() => {
-                homeScreenInstructions.style.display = 'none';
-            }, 1000);
-        }, 10000);
-    }
 });
 
 // Bee animation using physics-based movement
@@ -239,53 +150,53 @@ document.addEventListener('DOMContentLoaded', () => {
             const size = 50 + Math.random() * 50; // Increased from 40 + Math.random() * 40
             this.element.style.width = `${size}px`;
             this.element.style.height = `${size}px`;
+            
+            // Define the route waypoints (corners of the screen)
+            this.waypoints = [
+                { x: 50, y: 50 }, // Upper left corner
+                { x: window.innerWidth - 50, y: 50 }, // Upper right corner
+                { x: window.innerWidth - 50, y: window.innerHeight - 50 }, // Lower right corner
+                { x: 50, y: window.innerHeight - 50 } // Lower left corner
+            ];
+            
+            // Start with a random waypoint
+            this.currentWaypointIndex = Math.floor(Math.random() * this.waypoints.length);
+            this.targetWaypoint = this.waypoints[this.currentWaypointIndex];
+            
+            // Add a slight delay before starting to move (staggered start)
+            this.delay = index * 1000; // 1 second delay between bees
+            this.startTime = Date.now();
         }
 
         update(otherBee) {
-            // Add random acceleration (reduced)
-            this.vx += (Math.random() - 0.5) * 0.1;
-            this.vy += (Math.random() - 0.5) * 0.1;
-
-            // Add a slight tendency to move toward the center of the screen
-            // This helps prevent bees from getting stuck at the edges
-            const centerX = window.innerWidth / 2;
-            const centerY = window.innerHeight / 2;
-            const distFromCenterX = centerX - this.x;
-            const distFromCenterY = centerY - this.y;
-            const distFromCenter = Math.sqrt(distFromCenterX * distFromCenterX + distFromCenterY * distFromCenterY);
+            // Check if the bee should start moving
+            if (Date.now() - this.startTime < this.delay) {
+                return;
+            }
             
-            // If bee is far from center, add a slight pull toward center
-            if (distFromCenter > window.innerWidth / 3) {
-                this.vx += distFromCenterX * 0.0005;
-                this.vy += distFromCenterY * 0.0005;
+            // Calculate direction to the current target waypoint
+            const dx = this.targetWaypoint.x - this.x;
+            const dy = this.targetWaypoint.y - this.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // If we've reached the current waypoint, move to the next one
+            if (distance < 30) {
+                this.currentWaypointIndex = (this.currentWaypointIndex + 1) % this.waypoints.length;
+                this.targetWaypoint = this.waypoints[this.currentWaypointIndex];
             }
-
-            // Independent roaming behavior - no chasing
-            if (otherBee) {
-                const dx = otherBee.x - this.x;
-                const dy = otherBee.y - this.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                // If bees are very close, they'll move away from each other slightly
-                if (distance < 80) {
-                    this.vx -= dx * 0.001;
-                    this.vy -= dy * 0.001;
-                }
-                
-                // Occasionally change direction to explore
-                if (Math.random() < 0.03) { // 3% chance each frame
-                    // Add a random direction change
-                    this.vx += (Math.random() - 0.5) * 2;
-                    this.vy += (Math.random() - 0.5) * 2;
-                }
-            }
-
-            // Occasionally add a random "jump" to break out of repetitive patterns
-            if (Math.random() < 0.01) { // 1% chance each frame
-                this.vx += (Math.random() - 0.5) * 2;
-                this.vy += (Math.random() - 0.5) * 2;
-            }
-
+            
+            // Move towards the target waypoint
+            const targetVx = dx * 0.01;
+            const targetVy = dy * 0.01;
+            
+            // Smoothly adjust velocity towards target
+            this.vx += (targetVx - this.vx) * 0.05;
+            this.vy += (targetVy - this.vy) * 0.05;
+            
+            // Add very slight randomness to prevent completely straight lines
+            this.vx += (Math.random() - 0.5) * 0.02;
+            this.vy += (Math.random() - 0.5) * 0.02;
+            
             // Limit speed
             const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
             if (speed > this.maxSpeed) {
@@ -296,16 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // Update position
             this.x += this.vx;
             this.y += this.vy;
-
-            // Bounce off edges with some randomness
-            if (this.x < 0 || this.x > window.innerWidth) {
-                this.vx *= -1;
-                this.x = Math.max(0, Math.min(this.x, window.innerWidth));
-            }
-            if (this.y < 0 || this.y > window.innerHeight) {
-                this.vy *= -1;
-                this.y = Math.max(0, Math.min(this.y, window.innerHeight));
-            }
 
             // Update element position
             this.element.style.left = `${this.x}px`;
@@ -336,7 +237,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Handle window resize
     window.addEventListener('resize', () => {
+        // Update waypoints when window is resized
         beeInstances.forEach(bee => {
+            bee.waypoints = [
+                { x: 50, y: 50 }, // Upper left corner
+                { x: window.innerWidth - 50, y: 50 }, // Upper right corner
+                { x: window.innerWidth - 50, y: window.innerHeight - 50 }, // Lower right corner
+                { x: 50, y: window.innerHeight - 50 } // Lower left corner
+            ];
+            
+            // Update current target waypoint
+            bee.targetWaypoint = bee.waypoints[bee.currentWaypointIndex];
+            
+            // Ensure bees stay within bounds
             bee.x = Math.min(bee.x, window.innerWidth);
             bee.y = Math.min(bee.y, window.innerHeight);
         });
