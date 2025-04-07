@@ -58,6 +58,8 @@ function nextImage() {
     if (currentIndex < totalImages - 1) {
         currentIndex = (currentIndex + 1) % totalImages;
         showImage(currentIndex);
+        // Play music when navigating
+        playBackgroundMusic();
     }
 }
 
@@ -65,11 +67,32 @@ function prevImage() {
     if (currentIndex > 0) {
         currentIndex = (currentIndex - 1 + totalImages) % totalImages;
         showImage(currentIndex);
+        // Play music when navigating
+        playBackgroundMusic();
+    }
+}
+
+// Function to play background music
+function playBackgroundMusic() {
+    const backgroundMusic = document.getElementById('background-music');
+    const playPromise = backgroundMusic.play();
+    
+    if (playPromise !== undefined) {
+        playPromise.catch(error => {
+            console.log('Playback prevented:', error);
+        });
     }
 }
 
 // Initialize the first image
 showImage(currentIndex);
+
+// Remove the previous autoplay code and replace with this simplified version
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize the audio element
+    const backgroundMusic = document.getElementById('background-music');
+    backgroundMusic.volume = 0.5; // Set volume to 50%
+});
 
 // Bee animation using physics-based movement
 document.addEventListener('DOMContentLoaded', () => {
@@ -88,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.element.style.top = `${this.y}px`;
             
             // Random size variation
-            const size = 20 + Math.random() * 20;
+            const size = 30 + Math.random() * 30;
             this.element.style.width = `${size}px`;
             this.element.style.height = `${size}px`;
         }
