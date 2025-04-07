@@ -216,27 +216,75 @@ document.addEventListener('DOMContentLoaded', () => {
     const bees = document.querySelectorAll('.bee');
     const container = document.querySelector('.bee-container');
     
+    // Limit to only 2 bees
+    if (bees.length > 2) {
+        for (let i = 2; i < bees.length; i++) {
+            bees[i].remove();
+        }
+    }
+    
     class Bee {
-        constructor(element) {
+        constructor(element, index) {
             this.element = element;
+            this.index = index;
             this.x = Math.random() * window.innerWidth;
             this.y = Math.random() * window.innerHeight;
-            this.vx = (Math.random() - 0.5) * 2; // Random initial velocity
-            this.vy = (Math.random() - 0.5) * 2;
-            this.maxSpeed = 2 + Math.random() * 2; // Random max speed
+            this.vx = (Math.random() - 0.5) * 1; // Reduced initial velocity
+            this.vy = (Math.random() - 0.5) * 1;
+            this.maxSpeed = 1 + Math.random() * 0.5; // Reduced max speed
             this.element.style.left = `${this.x}px`;
             this.element.style.top = `${this.y}px`;
             
-            // Random size variation
-            const size = 30 + Math.random() * 30;
+            // Random size variation - increased size further
+            const size = 50 + Math.random() * 50; // Increased from 40 + Math.random() * 40
             this.element.style.width = `${size}px`;
             this.element.style.height = `${size}px`;
         }
 
-        update() {
-            // Add random acceleration
-            this.vx += (Math.random() - 0.5) * 0.2;
-            this.vy += (Math.random() - 0.5) * 0.2;
+        update(otherBee) {
+            // Add random acceleration (reduced)
+            this.vx += (Math.random() - 0.5) * 0.1;
+            this.vy += (Math.random() - 0.5) * 0.1;
+
+            // Add a slight tendency to move toward the center of the screen
+            // This helps prevent bees from getting stuck at the edges
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const distFromCenterX = centerX - this.x;
+            const distFromCenterY = centerY - this.y;
+            const distFromCenter = Math.sqrt(distFromCenterX * distFromCenterX + distFromCenterY * distFromCenterY);
+            
+            // If bee is far from center, add a slight pull toward center
+            if (distFromCenter > window.innerWidth / 3) {
+                this.vx += distFromCenterX * 0.0005;
+                this.vy += distFromCenterY * 0.0005;
+            }
+
+            // Independent roaming behavior - no chasing
+            if (otherBee) {
+                const dx = otherBee.x - this.x;
+                const dy = otherBee.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                // If bees are very close, they'll move away from each other slightly
+                if (distance < 80) {
+                    this.vx -= dx * 0.001;
+                    this.vy -= dy * 0.001;
+                }
+                
+                // Occasionally change direction to explore
+                if (Math.random() < 0.03) { // 3% chance each frame
+                    // Add a random direction change
+                    this.vx += (Math.random() - 0.5) * 2;
+                    this.vy += (Math.random() - 0.5) * 2;
+                }
+            }
+
+            // Occasionally add a random "jump" to break out of repetitive patterns
+            if (Math.random() < 0.01) { // 1% chance each frame
+                this.vx += (Math.random() - 0.5) * 2;
+                this.vy += (Math.random() - 0.5) * 2;
+            }
 
             // Limit speed
             const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
@@ -268,12 +316,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Create bee instances
-    const beeInstances = Array.from(bees).map(bee => new Bee(bee));
+    // Create bee instances (only 2)
+    const beeInstances = Array.from(bees).slice(0, 2).map((bee, index) => new Bee(bee, index));
 
     // Animation loop
     function animate() {
-        beeInstances.forEach(bee => bee.update());
+        // Update each bee with reference to the other bee
+        if (beeInstances.length === 2) {
+            beeInstances[0].update(beeInstances[1]);
+            beeInstances[1].update(beeInstances[0]);
+        } else if (beeInstances.length === 1) {
+            beeInstances[0].update(null);
+        }
         requestAnimationFrame(animate);
     }
 
