@@ -1,6 +1,8 @@
 let currentIndex = 0;
 const images = document.querySelectorAll('.carousel-image');
 const totalImages = images.length;
+const prevButton = document.querySelector('.arrow.left');
+const nextButton = document.querySelector('.arrow.right');
 
 function showImage(index) {
     images.forEach((img, i) => {
@@ -11,6 +13,10 @@ function showImage(index) {
             img.style.transform = 'rotateY(0deg)';
         }
     });
+
+    // Update button visibility
+    prevButton.style.display = index === 0 ? 'none' : 'block';
+    nextButton.style.display = index === totalImages - 1 ? 'none' : 'block';
 }
 
 function nextImage() {
@@ -25,14 +31,3 @@ function prevImage() {
 
 // Initialize the first image
 showImage(currentIndex);
-
-// Play audio on user interaction
-document.addEventListener('focus', () => {
-    const audio = document.querySelector('audio');
-    if (audio) {
-        audio.muted = false;
-        audio.play().catch(error => {
-            console.error('Play failed:', error);
-        });
-    }
-}, { once: true });
