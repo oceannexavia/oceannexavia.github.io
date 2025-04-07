@@ -128,6 +128,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }, { passive: false });
         
+        // Prevent pull-to-refresh
+        document.body.style.overscrollBehavior = 'none';
+        
+        // Hide scrollbars
+        document.body.style.overflow = 'hidden';
+        
         // Add a button to re-enter fullscreen if it gets exited
         const fullscreenButton = document.createElement('button');
         fullscreenButton.textContent = 'Full Screen';
@@ -181,6 +187,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 fullscreenButton.style.display = 'none';
             }
         });
+        
+        // Add instructions for adding to home screen
+        const homeScreenInstructions = document.createElement('div');
+        homeScreenInstructions.innerHTML = `
+            <div style="position: fixed; bottom: 20px; right: 20px; background-color: rgba(0,0,0,0.7); color: white; padding: 10px; border-radius: 5px; z-index: 1000; max-width: 80%; font-size: 14px;">
+                <p>For the best experience, add this page to your home screen:</p>
+                <p>1. Open your browser menu</p>
+                <p>2. Select "Add to Home Screen"</p>
+                <p>3. Launch from your home screen</p>
+            </div>
+        `;
+        document.body.appendChild(homeScreenInstructions);
+        
+        // Hide instructions after 10 seconds
+        setTimeout(() => {
+            homeScreenInstructions.style.opacity = '0';
+            homeScreenInstructions.style.transition = 'opacity 1s ease';
+            setTimeout(() => {
+                homeScreenInstructions.style.display = 'none';
+            }, 1000);
+        }, 10000);
     }
 });
 
