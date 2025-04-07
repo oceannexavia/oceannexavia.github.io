@@ -25,3 +25,14 @@ function prevImage() {
 
 // Initialize the first image
 showImage(currentIndex);
+
+// Play audio on user interaction
+document.addEventListener('focus', () => {
+    const audio = document.querySelector('audio');
+    if (audio) {
+        audio.muted = false;
+        audio.play().catch(error => {
+            console.error('Play failed:', error);
+        });
+    }
+}, { once: true });

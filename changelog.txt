@@ -1,0 +1,6 @@
+# Changelog
+
+## 2025-04-07
+
+- **Initial Commit**: Pushed the initial codebase to GitHub repository `https://github.com/oceannexavia/oceannexavia.github.io.git`.
+- **Branch Update**: Moved all contents from `master` to `main` and deleted the `master` branch.
