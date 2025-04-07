@@ -17,21 +17,90 @@ body, html {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.carousel-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.carousel-background img {
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    top: -10%;
+    left: -10%;
+    object-fit: cover;
+    filter: blur(20px) brightness(0.7);
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out;
+    will-change: opacity;
+}
+
+.carousel-background img.active {
+    opacity: 1;
 }
 
 .carousel-image {
     position: absolute;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
     opacity: 0;
-    transition: opacity 1s ease-in-out, transform 1s ease-in-out;
-    backface-visibility: hidden;
+    transition: opacity 0.8s ease-in-out;
+    z-index: 2;
+    display: block; /* Ensure images are displayed */
 }
 
 .carousel-image.active {
     opacity: 1;
-    transform: rotateY(0deg);
+}
+
+.carousel-image.flipping-right {
+    animation: flipPageRight 1.5s ease-in-out;
+}
+
+.carousel-image.flipping-left {
+    animation: flipPageLeft 1.5s ease-in-out;
+}
+
+@keyframes flipPageRight {
+    0% {
+        transform: rotateY(0deg);
+    }
+    50% {
+        transform: rotateY(-90deg);
+    }
+    100% {
+        transform: rotateY(0deg);
+    }
+}
+
+@keyframes flipPageLeft {
+    0% {
+        transform: rotateY(0deg);
+    }
+    25% {
+        transform: rotateY(15deg);
+    }
+    50% {
+        transform: rotateY(-90deg);
+    }
+    75% {
+        transform: rotateY(-15deg);
+    }
+    100% {
+        transform: rotateY(0deg);
+    }
 }
 
 .arrow {
@@ -41,10 +110,16 @@ body, html {
     background-color: rgba(0, 0, 0, 0.5);
     color: white;
     border: none;
-    padding: 10px;
+    width: 40px;
+    height: 40px;
     cursor: pointer;
     border-radius: 50%;
     transition: background-color 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    z-index: 20;
 }
 
 .arrow:hover {
@@ -57,6 +132,20 @@ body, html {
 
 .arrow.right {
     right: 20px;
+}
+
+/* Media query for larger screens */
+@media screen and (min-width: 768px) {
+    .carousel-image {
+        max-width: 90vw;
+        max-height: 90vh;
+    }
+    
+    .arrow {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+    }
 }
 
 .bee-container {
@@ -72,46 +161,18 @@ body, html {
 
 .bee {
     position: absolute;
-    width: 50px; /* Adjust size as needed */
-    height: 50px; /* Adjust size as needed */
+    width: 30px;
+    height: 30px;
     background-image: url('img/bee.png');
     background-size: contain;
     background-repeat: no-repeat;
-    /* Removed transition, will use animation */
-    animation-iteration-count: infinite;
-    animation-timing-function: linear;
-    /* Base transform */
-    transform: translate(0, 0);
+    pointer-events: none;
+    will-change: transform;
+    transform-origin: center;
 }
 
 .bee.flipped {
-    transform: scaleX(-1); /* Flip horizontally */
+    transform: scaleX(-1);
 }
 
-/* Define simplified flight path animations */
-/* Horizontal */
-@keyframes fly-left-to-right {
-    0% { left: -150px; }
-    100% { left: calc(100vw + 50px); }
-}
-
-@keyframes fly-right-to-left {
-    0% { left: calc(100vw + 50px); }
-    100% { left: -150px; }
-}
-
-/* Vertical */
-@keyframes fly-top-to-bottom {
-    0% { top: -150px; }
-    100% { top: calc(100vh + 50px); }
-}
-
-@keyframes fly-bottom-to-top {
-    0% { top: calc(100vh + 50px); }
-    100% { top: -150px; }
-}
-
-/* Diagonal - Combine horizontal and vertical movement */
-/* Note: Diagonal animations might be complex to perfect with just keyframes */
-/* We'll stick to horizontal/vertical for simplicity and reliability for now */
-/* If diagonal is crucial, it might require more JS intervention */
+/* Remove the old keyframe animations as we'll handle movement in JavaScript */

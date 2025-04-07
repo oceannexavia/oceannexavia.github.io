@@ -4,13 +4,48 @@ const totalImages = images.length;
 const prevButton = document.querySelector('.arrow.left');
 const nextButton = document.querySelector('.arrow.right');
 
+// Create background container
+const carousel = document.querySelector('.carousel');
+const background = document.createElement('div');
+background.className = 'carousel-background';
+carousel.insertBefore(background, carousel.firstChild);
+
+// Create background images
+images.forEach((img, index) => {
+    const bgImg = document.createElement('img');
+    bgImg.src = img.src;
+    if (index === 0) {
+        bgImg.classList.add('active');
+    }
+    background.appendChild(bgImg);
+});
+
+const backgroundImages = document.querySelectorAll('.carousel-background img');
+
+// Make sure all images are visible but with opacity 0
+images.forEach(img => {
+    img.style.display = 'block';
+    img.style.opacity = '0';
+});
+
 function showImage(index) {
+    // Show current image and hide others
     images.forEach((img, i) => {
-        img.style.opacity = 0;
-        img.style.transform = 'rotateY(180deg)';
         if (i === index) {
-            img.style.opacity = 1;
-            img.style.transform = 'rotateY(0deg)';
+            img.classList.add('active');
+            img.style.opacity = '1';
+        } else {
+            img.classList.remove('active');
+            img.style.opacity = '0';
+        }
+    });
+
+    // Update background images
+    backgroundImages.forEach((bgImg, i) => {
+        if (i === index) {
+            bgImg.classList.add('active');
+        } else {
+            bgImg.classList.remove('active');
         }
     });
 
@@ -20,74 +55,96 @@ function showImage(index) {
 }
 
 function nextImage() {
-    currentIndex = (currentIndex + 1) % totalImages;
-    showImage(currentIndex);
+    if (currentIndex < totalImages - 1) {
+        currentIndex = (currentIndex + 1) % totalImages;
+        showImage(currentIndex);
+    }
 }
 
 function prevImage() {
-    currentIndex = (currentIndex - 1 + totalImages) % totalImages;
-    showImage(currentIndex);
+    if (currentIndex > 0) {
+        currentIndex = (currentIndex - 1 + totalImages) % totalImages;
+        showImage(currentIndex);
+    }
 }
 
 // Initialize the first image
 showImage(currentIndex);
 
-// Bee animation using CSS keyframes
+// Bee animation using physics-based movement
 document.addEventListener('DOMContentLoaded', () => {
     const bees = document.querySelectorAll('.bee');
     const container = document.querySelector('.bee-container');
-    // Simplified animations
-    const animations = [
-        'fly-left-to-right',
-        'fly-right-to-left',
-        'fly-top-to-bottom',
-        'fly-bottom-to-top'
-    ];
-
-    bees.forEach(bee => {
-        const containerWidth = container.offsetWidth;
-        const containerHeight = container.offsetHeight;
-
-        // Random animation name
-        const animationName = animations[Math.floor(Math.random() * animations.length)];
-
-        // Random duration (e.g., 6 to 12 seconds)
-        const duration = Math.random() * 6 + 6;
-
-        // Random delay (e.g., 0 to 5 seconds)
-        const delay = Math.random() * 5;
-
-        // Reset styles
-        bee.style.animation = 'none'; // Clear previous animation
-        bee.classList.remove('flipped'); // Remove flip class if present
-        bee.style.transform = ''; // Reset transform
-
-        // Set initial position and flip class based on animation
-        if (animationName === 'fly-left-to-right') {
-            bee.style.top = `${Math.random() * containerHeight}px`;
-            bee.style.left = '-150px'; // Start off-screen left
-        } else if (animationName === 'fly-right-to-left') {
-            bee.style.top = `${Math.random() * containerHeight}px`;
-            // Use a large fixed value to ensure it starts off-screen right
-            bee.style.left = `${containerWidth + 150}px`;
-            bee.classList.add('flipped'); // Add flip class
-        } else if (animationName === 'fly-top-to-bottom') {
-            bee.style.left = `${Math.random() * containerWidth}px`;
-            bee.style.top = '-150px'; // Start off-screen top
-        } else if (animationName === 'fly-bottom-to-top') {
-            bee.style.left = `${Math.random() * containerWidth}px`;
-            bee.style.top = `calc(100vh + 50px)`; // Start off-screen bottom
+    
+    class Bee {
+        constructor(element) {
+            this.element = element;
+            this.x = Math.random() * window.innerWidth;
+            this.y = Math.random() * window.innerHeight;
+            this.vx = (Math.random() - 0.5) * 2; // Random initial velocity
+            this.vy = (Math.random() - 0.5) * 2;
+            this.maxSpeed = 2 + Math.random() * 2; // Random max speed
+            this.element.style.left = `${this.x}px`;
+            this.element.style.top = `${this.y}px`;
+            
+            // Random size variation
+            const size = 20 + Math.random() * 20;
+            this.element.style.width = `${size}px`;
+            this.element.style.height = `${size}px`;
         }
 
-        // Force reflow to apply initial styles before animation starts
-        void bee.offsetWidth;
+        update() {
+            // Add random acceleration
+            this.vx += (Math.random() - 0.5) * 0.2;
+            this.vy += (Math.random() - 0.5) * 0.2;
 
-        // Apply new animation properties
-        bee.style.animationName = animationName;
-        bee.style.animationDuration = `${duration}s`;
-        bee.style.animationDelay = `${delay}s`;
-        // Re-apply infinite and linear timing which might be reset by setting 'animation: none'
-        bee.style.animationIterationCount = 'infinite';
-        bee.style.animationTimingFunction = 'linear';
+            // Limit speed
+            const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+            if (speed > this.maxSpeed) {
+                this.vx = (this.vx / speed) * this.maxSpeed;
+                this.vy = (this.vy / speed) * this.maxSpeed;
+            }
+
+            // Update position
+            this.x += this.vx;
+            this.y += this.vy;
+
+            // Bounce off edges with some randomness
+            if (this.x < 0 || this.x > window.innerWidth) {
+                this.vx *= -1;
+                this.x = Math.max(0, Math.min(this.x, window.innerWidth));
+            }
+            if (this.y < 0 || this.y > window.innerHeight) {
+                this.vy *= -1;
+                this.y = Math.max(0, Math.min(this.y, window.innerHeight));
+            }
+
+            // Update element position
+            this.element.style.left = `${this.x}px`;
+            this.element.style.top = `${this.y}px`;
+
+            // Update bee direction
+            this.element.classList.toggle('flipped', this.vx < 0);
+        }
+    }
+
+    // Create bee instances
+    const beeInstances = Array.from(bees).map(bee => new Bee(bee));
+
+    // Animation loop
+    function animate() {
+        beeInstances.forEach(bee => bee.update());
+        requestAnimationFrame(animate);
+    }
+
+    // Start animation
+    animate();
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        beeInstances.forEach(bee => {
+            bee.x = Math.min(bee.x, window.innerWidth);
+            bee.y = Math.min(bee.y, window.innerHeight);
+        });
     });
 });
