@@ -87,11 +87,101 @@ function playBackgroundMusic() {
 // Initialize the first image
 showImage(currentIndex);
 
-// Remove the previous autoplay code and replace with this simplified version
+// Full-screen functionality
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize the audio element
     const backgroundMusic = document.getElementById('background-music');
     backgroundMusic.volume = 0.5; // Set volume to 50%
+    
+    // Function to request fullscreen
+    function requestFullscreen() {
+        const elem = document.documentElement;
+        
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) { /* Safari */
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { /* IE11 */
+            elem.msRequestFullscreen();
+        }
+    }
+    
+    // Function to check if the device is mobile
+    function isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+    
+    // Request fullscreen on mobile devices
+    if (isMobileDevice()) {
+        // Try to enter fullscreen mode
+        requestFullscreen();
+        
+        // Add event listener for orientation change to re-enter fullscreen
+        window.addEventListener('orientationchange', () => {
+            setTimeout(requestFullscreen, 100);
+        });
+        
+        // Prevent default touch behaviors that might exit fullscreen
+        document.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        // Add a button to re-enter fullscreen if it gets exited
+        const fullscreenButton = document.createElement('button');
+        fullscreenButton.textContent = 'Full Screen';
+        fullscreenButton.style.position = 'fixed';
+        fullscreenButton.style.bottom = '20px';
+        fullscreenButton.style.left = '20px';
+        fullscreenButton.style.zIndex = '1000';
+        fullscreenButton.style.padding = '10px 20px';
+        fullscreenButton.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        fullscreenButton.style.color = 'white';
+        fullscreenButton.style.border = 'none';
+        fullscreenButton.style.borderRadius = '5px';
+        fullscreenButton.style.cursor = 'pointer';
+        fullscreenButton.style.display = 'none'; // Hidden by default
+        
+        fullscreenButton.addEventListener('click', () => {
+            requestFullscreen();
+        });
+        
+        document.body.appendChild(fullscreenButton);
+        
+        // Show the button when fullscreen is exited
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                fullscreenButton.style.display = 'block';
+            } else {
+                fullscreenButton.style.display = 'none';
+            }
+        });
+        
+        document.addEventListener('webkitfullscreenchange', () => {
+            if (!document.webkitFullscreenElement) {
+                fullscreenButton.style.display = 'block';
+            } else {
+                fullscreenButton.style.display = 'none';
+            }
+        });
+        
+        document.addEventListener('mozfullscreenchange', () => {
+            if (!document.mozFullScreenElement) {
+                fullscreenButton.style.display = 'block';
+            } else {
+                fullscreenButton.style.display = 'none';
+            }
+        });
+        
+        document.addEventListener('MSFullscreenChange', () => {
+            if (!document.msFullscreenElement) {
+                fullscreenButton.style.display = 'block';
+            } else {
+                fullscreenButton.style.display = 'none';
+            }
+        });
+    }
 });
 
 // Bee animation using physics-based movement
